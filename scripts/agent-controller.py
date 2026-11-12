@@ -7,6 +7,7 @@ CONTROL = SERVER / 'console-commands.txt'
 OUT = ROOT / 'agent-logs'
 OBJ = 'Cooperate with ChatGPT, Claude and DeepSeek in Skyblock. Together put 1 diamond in the starter chest at (-2,65,-4). Mine cobblestone from the existing generator, reach the sand island, build a house and reach the Nether along the way.'
 SPECS = {'ChatGPT': ('MINECRAFT_CODEX','openai/gpt-6-luna'), 'Claude': ('MINECRAFT_CLAUDE','anthropic/claude-haiku-5-5'), 'DeepSeek': ('MINECRAFT_DEEPSEEK','deepseek/deepseek-flash')}
+PLAYER = os.environ.get('SKYBLOCK_PLAYER', 'Krebes')
 workers = {}
 
 def announce(msg):
@@ -51,7 +52,7 @@ def main():
                     line=raw.decode('utf-8','replace').strip()
                     if start_when_ready and re.search(r'\bDone \(.*\)!', line):
                         start(); start_when_ready = False
-                    m=re.search(r'Krebes issued server command: /agents (start|remove|stop)\s*$',line,re.I)
+                    m=re.search(re.escape(PLAYER) + r' issued server command: /agents (start|remove|stop)\s*$',line,re.I)
                     if m: (start if m.group(1).lower()=='start' else remove)()
             time.sleep(.3)
         except Exception as e:

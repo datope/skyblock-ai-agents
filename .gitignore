@@ -25,3 +25,8 @@ tts/voices/
 __pycache__/
 *.pid
 *.lock
+
+.venv-voice/
+*.part
+stt/muted.flag
+tts/speaking-until.txt

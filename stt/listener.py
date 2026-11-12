@@ -14,12 +14,13 @@ LOG = ROOT / 'skyblock-server' / 'live-console.log'
 CONTROL = ROOT / 'skyblock-server' / 'console-commands.txt'
 MUTE = ROOT / 'stt' / 'muted.flag'
 SPEAKING = ROOT / 'tts' / 'speaking-until.txt'
-MODEL = Path.home() / '.cache' / 'whisper' / 'small.pt'
+MODEL = 'small'
+PLAYER = os.environ.get('SKYBLOCK_PLAYER', 'Krebes')
 PAUSE_SECONDS = 1.2
 RATE = 16000
-JOINED = re.compile(r'\]: Krebes joined the game\s*$')
-LEFT = re.compile(r'\]: Krebes left the game\s*$')
-TOGGLE = re.compile(r'<Krebes>\s+!voice\s+(on|off)\s*$', re.I)
+JOINED = re.compile(r'\]: ' + re.escape(PLAYER) + r' joined the game\s*$')
+LEFT = re.compile(r'\]: ' + re.escape(PLAYER) + r' left the game\s*$')
+TOGGLE = re.compile(r'<' + re.escape(PLAYER) + r'>\s+!voice\s+(on|off)\s*$', re.I)
 
 
 def parent_alive(pid):
@@ -50,7 +51,7 @@ def clean_text(text):
 def send_text(text):
     text=clean_text(text)
     if not text: return False
-    msg={'text':'<Krebes> (голос) '+text,'color':'white'}
+    msg={'text':f'<{PLAYER}> (голос) '+text,'color':'white'}
     with CONTROL.open('a',encoding='utf-8') as f:
         f.write('tellraw @a '+json.dumps(msg,ensure_ascii=False)+'\n')
     logging.info('Voice message delivered to server queue (%d characters)',len(text))

@@ -17,7 +17,7 @@ SERVER = ROOT / 'skyblock-server'
 RESET = ROOT / 'skyblock-reset'
 PAUSE = RESET / 'restarting'
 ACTIVE = RESET / 'active'
-COMMAND = re.compile(r'Krebes issued server command: /airestart\s*$', re.I)
+COMMAND = re.compile(re.escape(os.environ.get('SKYBLOCK_PLAYER', 'Krebes')) + r' issued server command: /airestart\s*$', re.I)
 READY = 'Skyblock: one team, one diamond.'
 LIVE_LOG = SERVER / 'live-console.log'
 ANSI = re.compile(r'\x1b\[[0-9;]*m')
@@ -177,6 +177,7 @@ def wait_for_agents(timeout=30):
 
 def run():
     RESET.mkdir(exist_ok=True)
+    SERVER.mkdir(exist_ok=True)
     resume = '--resume-reset' in sys.argv
     if PAUSE.exists() and not resume:
         raise RuntimeError('An unfinished reset exists. Inspect skyblock-reset/restarting and backups before restarting.')
@@ -187,8 +188,11 @@ def run():
     # Tie the voice helpers to the supervisor, not the launcher shell: the
     # server can outlive that shell and /airestart replaces only its child.
     no_window = getattr(subprocess, 'CREATE_NO_WINDOW', 0)
-    for python, script in ((sys.executable, ROOT / 'tts' / 'speaker.py'),
-                           (sys.executable, ROOT / 'stt' / 'listener.py')):
+    voice_python = ROOT / '.venv-voice' / 'Scripts' / 'python.exe'
+    if not voice_python.exists():
+        print('Voice helpers are not installed. Run setup-voice.ps1 to enable them.', flush=True)
+    for python, script in ((voice_python, ROOT / 'tts' / 'speaker.py'),
+                           (voice_python, ROOT / 'stt' / 'listener.py')):
         if Path(python).exists() and script.exists():
             subprocess.Popen([str(python), str(script), '--parent', str(os.getpid())], cwd=ROOT,
                              stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=no_window)
