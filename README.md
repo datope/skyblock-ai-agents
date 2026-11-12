@@ -9,6 +9,7 @@
 В PowerShell в папке проекта:
 
 ```powershell
+Set-ExecutionPolicy -Scope Process Bypass
 npm ci
 Copy-Item .env.example .env
 notepad .env
